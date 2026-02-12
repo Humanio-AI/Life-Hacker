@@ -1,57 +1,35 @@
 import streamlit as st
-from openai import OpenAI
+import requests
 
-# -----------------------------
-# PAGE CONFIG
-# -----------------------------
-st.set_page_config(
-    page_title="Life Hacker Bot",
-    page_icon="🤖",
-    layout="centered"
-)
+st.set_page_config(page_title="Life Hacker Bot", page_icon="🤖")
 
 st.title("🤖 Life Hacker Bot")
 
-# -----------------------------
-# LOAD API KEY FROM SECRETS
-# -----------------------------
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-# -----------------------------
-# SESSION MEMORY
-# -----------------------------
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# -----------------------------
-# DISPLAY CHAT HISTORY
-# -----------------------------
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-# -----------------------------
-# USER INPUT
-# -----------------------------
-prompt = st.chat_input("Ask me anything...")
+prompt = st.chat_input("Ask something...")
 
 if prompt:
-    # Store user message
     st.session_state.messages.append({"role": "user", "content": prompt})
-
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Get OpenAI response
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=st.session_state.messages
+    response = requests.post(
+        "http://localhost:11434/api/generate",
+        json={
+            "model": "mistral",
+            "prompt": prompt,
+            "stream": False
+        }
     )
 
-    reply = response.choices[0].message.content
+    reply = response.json()["response"]
 
-    # Store assistant response
     st.session_state.messages.append({"role": "assistant", "content": reply})
-
     with st.chat_message("assistant"):
         st.markdown(reply)
