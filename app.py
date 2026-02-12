@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-st.set_page_config(page_title="Life Hacker Bot", page_icon="🤖")
+st.set_page_config(page_title="Life Hacker Chatbot", page_icon="🤖")
 
 st.title("🤖 Life Hacker Bot")
 
